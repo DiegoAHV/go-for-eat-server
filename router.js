@@ -145,6 +145,12 @@ const routes = function (app) {
       meetingsController.updateMeeting.bind(meetingsController),
     )
 
+    .get(
+      '/getMeetings/:restaurant',
+      authorize,
+      meetingsController.readMeeting.bind(meetingsController)
+    )
+
     .options('/', options)
     .trace('/', trace)
     .head('/', head);

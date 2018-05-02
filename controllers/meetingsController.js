@@ -48,8 +48,6 @@ class MeetingsController {
   }
 
   async deleteMeeting (ctx, next) {
-    console.log('INSIDE DELETE');
-
     if ('DELETE' != ctx.method) return await next();
 
     try {
@@ -74,35 +72,22 @@ class MeetingsController {
   async readMeeting (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
-      const paramId = ctx.params.id;
-      const event = await this.Meetings.find([
-        { $match: { _id: paramId } },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'attendees',
-            foreignField: '_id',
-            as: 'attendees'
-          }
-        },
-        {
-          $project: {
-            'attendees.email': 0,
-            'attendees.birthday': 0,
-            'attendees.gender': 0,
-            'attendees.events': 0,
-            'attendees.created_events': 0,
-            'attendees.accessToken': 0,
-            'attendees.ratings_average': 0,
-            'attendees.ratings_number': 0,
-            'attendees.profession': 0,
-            'attendees.description': 0,
-            'attendees.interests': 0
-          }
-        }
-      ]);
+      const organiserId = ctx.params.restaurant;
+      console.log('HERES ORGANISER ID', organiserId);
+      console.log('HERES ORGANISER ID type',typeof organiserId);
+
+      const meetings = await this.Meetings.find(
+        // [
+        // {$project:{'organiser' : 1}},
+        // {$match: { organiserId}}
+      // ]
+      // { organiser:ObjectId ('5ae9ac7a225a591208ed2460') }
+      {seats : '300'}
+      );
+      console.log(meetings);
+
       ctx.status = 200;
-      ctx.body = event;
+      ctx.body = meetings;
     } catch (e) {
       Raven.captureException(e);
       ctx.status = 500;
@@ -111,6 +96,30 @@ class MeetingsController {
 
   async updateMeeting (ctx, next) {
     const restaurant = ctx.user;
+    if ('PUT' != ctx.method) return await next();
+
+    //filter invalid inputs
+    const update = ctx.request.body;
+    console.log(update);
+
+    try {
+      const meetingId = ctx.params.meeting_id;
+      const meeting = await this.Meetings.findOneAndUpdate(
+        { _id : meetingId },
+        update
+      );
+
+      // if (meeting && meeting.attendees.length === ) {
+      //   await this.Events.remove({ _id: paramId });
+      // } else return (ctx.status = 404);
+      // ctx.status = 204;
+    } catch (e) {
+      Raven.captureException(e);
+      ctx.status = 500;
+    }
+    ctx.status = 201;
+
+    ctx.body = 'Meeting updated!';
   }
 
 }
