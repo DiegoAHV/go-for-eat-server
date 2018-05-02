@@ -14,6 +14,7 @@ class MeetingsController {
     const { date, time, seats } = ctx.request.body;
     // get the accestoken from header and store it in organiser
 
+    const organiser = ctx.user._id;
     if (!date || !time || !seats ) {
       ctx.status = 400;
       ctx.body = 'Please complete all fields';
@@ -47,13 +48,16 @@ class MeetingsController {
   }
 
   async deleteMeeting (ctx, next) {
+    console.log('INSIDE DELETE');
+
     if ('DELETE' != ctx.method) return await next();
+
     try {
-      const paramId = ctx.params.id;
-      const meeting = await this.Meetings.findOne({
-        _id: paramId,
-        creator: ctx.user._id// restaurant??
-      });
+      const meetingId = ctx.params.meeting_id;
+      const meeting = await this.Meetings.findOneAndDelete(
+        { _id : meetingId }
+      );
+
       // if (meeting && meeting.attendees.length === ) {
       //   await this.Events.remove({ _id: paramId });
       // } else return (ctx.status = 404);
@@ -62,13 +66,16 @@ class MeetingsController {
       Raven.captureException(e);
       ctx.status = 500;
     }
+    ctx.status = 201;
+
+    ctx.body = 'Meeting deleted!';
   }
 
-  async getMeeting (ctx, next) {
+  async readMeeting (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
       const paramId = ctx.params.id;
-      const event = await this.Meetings.aggregate([
+      const event = await this.Meetings.find([
         { $match: { _id: paramId } },
         {
           $lookup: {
@@ -98,11 +105,11 @@ class MeetingsController {
       ctx.body = event;
     } catch (e) {
       Raven.captureException(e);
-      cotx.status = 500;
+      ctx.status = 500;
     }
   }
 
-  async editMeeting (ctx, next) {
+  async updateMeeting (ctx, next) {
     const restaurant = ctx.user;
   }
 

@@ -112,14 +112,13 @@ const routes = function (app) {
     )
 
     .post(
-      '/restaurant',
+      '/restaurant/sign-up',
       restaurantsController.createRestaurant.bind(restaurantsController)
     )
 
-    //PREGUNTAR A AROL POR ESTO @@@@@@@@@@@@@#################
     .get(
-      '/restaurant/sign-in',
-      restaurantsController.signIn.bind(restaurantsController)
+      '/restaurant/log-in',
+      restaurantsController.logIn.bind(restaurantsController)
     )
 
     .get(
@@ -129,15 +128,21 @@ const routes = function (app) {
     )
 
     .post(
-      '/restaurant/createEvents',
+      '/createMeeting',
       authorize,
       meetingsController.createMeeting.bind(meetingsController)
     )
 
-    .put(
-      '/restaurants/events/:event_id',
+    .delete(
+      '/meetings/delete/:meeting_id',
       authorize,
-      meetingsController.editMeeting.bind(meetingsController),
+      meetingsController.deleteMeeting.bind(meetingsController)
+    )
+
+    .put(
+      '/meetings/update/:meeting_id',
+      authorize,
+      meetingsController.updateMeeting.bind(meetingsController),
     )
 
     .options('/', options)

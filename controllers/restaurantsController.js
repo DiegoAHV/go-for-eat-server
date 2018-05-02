@@ -64,24 +64,23 @@ class RestaurantsController {
     } ;
   }
 
-  async signIn (ctx) {
+  async logIn (ctx) {
     let authorization = ctx.headers.authorization;
-    console.log('HERES AUTHORIZATION', authorization);
 
     if ((authorization) && authorization.split(' ')[0] === 'Basic') {
-      console.log('INSIDE REST AUTH');
 
       ctx.pass64 = authorization.split(' ')[1];
-      console.log('PASS64', ctx.pass64);
 
       const pass = base64.decode(ctx.pass64).split(':')[1];
-      console.log('pass,decrypted',pass);
 
       const email = base64.decode(ctx.pass64).split(':')[0];
-      console.log('user decrypted',email);
 
       const target = await this.Restaurants.findOne({ email });
-      console.log('TARGET PASS',target.hashed);
+
+      if (!target) {
+        ctx.status = 401;
+        return;
+      }
 
       const res = await bcrypt.compare(pass, target.hashed);
       if (res) ctx.user = target;
@@ -93,6 +92,8 @@ class RestaurantsController {
   async me (ctx) {
     ctx.body = ctx.user;
   }
+
+
 
 }
 
